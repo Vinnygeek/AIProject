@@ -1,7 +1,8 @@
 import FileHandle as fh
 import random
 import Individual as ind
-
+import time
+import numpy
 class GA:
     currentGen = 0 #Current Generation of the process
     individualDefaultSize = 0
@@ -43,13 +44,14 @@ class GA:
                     self.finalY = j
 
         #Setting the population with the movements randomly
+        #Creating population
         for k in range(self.numIndividuals):
             #Creating an individual and setting the initial x and y position at the 'S' location
             newIndividual = ind.Individual()
             newIndividual.actualXPos = self.initialX
             newIndividual.actualYPos = self.initialY
-            for l in range(self.individualSize):
-                op = random.randint(0,3)
+            for l in range(10): #self.individualSize
+                op = self.genRandom(0,3)
                 if(op == 0):
                     newIndividual.genotype.append('U') #U for Up movement
                 elif(op == 1):
@@ -58,8 +60,14 @@ class GA:
                     newIndividual.genotype.append('D') #D for down
                 elif(op == 3):
                     newIndividual.genotype.append('L') #L for Left
+            random.shuffle(newIndividual.genotype)
+            print("---------------------------------------------")
             self.population.append(newIndividual)
-        
+            del newIndividual
+            for k in range(len(self.population)):
+                print("on ",k,"iteration",self.population[k].genotype)
+
+        #---------------------------------------------------------------------
         #Calculating the fitness of each individual
         for o in range(len(self.population)):
             for step in self.population[o].genotype:
@@ -69,7 +77,7 @@ class GA:
                             self.population[o].actualYPos -= 1 
                             if(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == ' '):
                                 self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] = '*'
-                                self.population[o].fitness += 1
+                                self.population[o].fitness += 50
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'S'):
                                 self.population[o].fitness -= 1
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == '*'):
@@ -78,7 +86,7 @@ class GA:
                                 self.population[o].pathFound = 1
                                 self.population[o].path = self.workingMaze
                                 self.workingMaze = self.cleanMaze #Reset the maze
-                                print("Path Found")
+                                print("Path Found in U")
                             else:#A wall was hit
                                 self.population[o].fitness -= 2
                                 self.population[o].actualYPos += 1 #Returning to the position before hit.
@@ -87,7 +95,7 @@ class GA:
                             self.population[o].actualXPos += 1 
                             if(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == ' '):
                                 self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] = '*'
-                                self.population[o].fitness += 1
+                                self.population[o].fitness += 50
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'S'):
                                 self.population[o].fitness -= 1
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == '*'):
@@ -96,7 +104,7 @@ class GA:
                                 self.population[o].pathFound = 1
                                 self.population[o].path = self.workingMaze
                                 self.workingMaze = self.cleanMaze #Reset the maze
-                                print("Path Found")
+                                print("Path Found in R")
                             else:#A wall was hit
                                 self.population[o].fitness -= 2
                                 self.population[o].actualXPos -= 1
@@ -105,7 +113,7 @@ class GA:
                             self.population[o].actualYPos += 1 
                             if(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == ' '):
                                 self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] = '*'
-                                self.population[o].fitness += 1
+                                self.population[o].fitness += 50
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'S'):
                                 self.population[o].fitness -= 1
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == '*'):
@@ -114,7 +122,7 @@ class GA:
                                 self.population[o].pathFound = 1
                                 self.population[o].path = self.workingMaze
                                 self.workingMaze = self.cleanMaze #Reset the maze
-                                print("Path Found")
+                                print("Path Found in D")
                             else:#A wall was hit
                                 self.population[o].fitness -= 2
                                 self.population[o].actualYPos -= 1 
@@ -123,7 +131,7 @@ class GA:
                             self.population[o].actualXPos -= 1 
                             if(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == ' '):
                                 self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] = '*'
-                                self.population[o].fitness += 1
+                                self.population[o].fitness += 50
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'S'):
                                 self.population[o].fitness -= 1
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == '*'):
@@ -134,13 +142,18 @@ class GA:
                                     print(a)
                                 self.population[o].path = self.workingMaze
                                 self.workingMaze = self.cleanMaze #Reset the maze
-                                print("Path Found")
+                                print("Path Found in L")
                             else:#A wall was hit
                                 self.population[o].fitness -= 2
                                 self.population[o].actualXPos += 1
-            print(o,"Individual Fitness",self.population[o].fitness)
+
+            print(o,"Individual Fitness",self.population[o].fitness,self.population[o])
             fh.FileHandle.fileWriting(self,"files/testingMaze.txt",self.workingMaze) #Getting one of the paths
             self.workingMaze = self.cleanMaze #Cleaning the maze for the next individual
+
+    def genRandom(self,lLimit,Rlimit):
+        value = random.randint(lLimit,Rlimit)
+        return value
 
     def printConfigData(self):
         print("Maze File: ",self.mazeFile,)

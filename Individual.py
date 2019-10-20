@@ -1,7 +1,8 @@
 class Individual:
-    fitness = 0
-    genotype = []
-    actualXPos = 0
-    actualYPos = 0
-    pathFound = 0
-    path = []
+    def __init__(self):
+        self.fitness = 0
+        self.genotype = []
+        self.actualXPos = 0
+        self.actualYPos = 0
+        self.pathFound = 0
+        self.path = []

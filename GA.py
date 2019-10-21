@@ -38,6 +38,7 @@ class GA:
         self.nIndToCross = int(round(self.crossoverIndex*self.numIndividuals/100))
         self.nIndToMutate = int(round(self.mutationIndex*self.numIndividuals/100))
 
+
         #calculating the default size(which is the number of empry spaces of the maze)
         for i in self.workingMaze:
             for j in i:
@@ -65,7 +66,7 @@ class GA:
             newIndividual = ind.Individual()
             newIndividual.actualXPos = self.initialX
             newIndividual.actualYPos = self.initialY
-            for l in range(10): #self.individualSize
+            for l in range(self.individualSize): #self.individualSize
                 op = self.genRandom(0,3)
                 if(op == 0):
                     newIndividual.genotype.append('U') #U for Up movement
@@ -80,8 +81,8 @@ class GA:
             del newIndividual
             
         #For debug purpose---------------------------------------------------------------
-        for k in range(len(self.population)):
-            print("on ",k,"iteration",self.population[k].genotype)
+        #for k in range(len(self.population)):
+            #print("on ",k,"iteration",self.population[k].genotype)
 
         #---------------------------------------------------------------------
         #Calculating the fitness of each individual
@@ -175,6 +176,7 @@ class GA:
         #Saving the best individual from population
         self.saveBestIndividual()
         self.beginGA()
+        self.beginMutation()
 
     def genRandom(self,lLimit,Rlimit):
         value = random.randint(lLimit,Rlimit)
@@ -271,6 +273,28 @@ class GA:
         #Begin the crossover
         self.beginCrossover()
         #Save the est individual again
+
+    def beginMutation(self):
+        #Shuflling the individuals to mutate
+        random.shuffle(self.population)
+        for m1 in range(self.nIndToMutate):
+            for m2 in range(self.nGenotypeToMutate):
+                rad = self.genRandom(0,3)
+                if(rad == 0):
+                    self.population[m1].genotype[m2] = 'U' #U for Up movement
+                    print("UUUUUUUUUUUUUUUUUU",self.population[m1].genotype[m2])
+                elif(rad == 1):
+                    self.population[m1].genotype[m2] = 'R' #R for Right
+                    print("RRRRRRRRRRRRRRRRR",self.population[m1].genotype[m2])
+                elif(rad == 2):
+                    self.population[m1].genotype[m2] = 'D' #D for down
+                    print("DDDDDDDDDDDDDDDDDD",self.population[m1].genotype[m2])
+                elif(rad == 3):
+                    self.population[m1].genotype[m2] = 'L' #L for Left
+                    print("LLLLLLLLLLLLLLLLLL",self.population[m1].genotype[m2])
+
+        self.saveBestIndividual()
+        
     def saveBestIndividual(self):
         print("Saving the best individual")
         for indiv in self.population:

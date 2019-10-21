@@ -3,6 +3,8 @@ import random
 import Individual as ind
 import time
 import numpy
+import operator
+
 class GA:
     matingPool = [] #will store the index of each individual for mating
     mutationPool = [] #will store the index of each individual for mutation
@@ -165,7 +167,7 @@ class GA:
                 if(_ind.fitness <= 0):
                     _ind.fitness = 10 #Setting the 10 points fitness to all the negative fitness
 
-            print(o,"Individual Fitness",self.population[o].fitness)
+            #print(o,"Individual Fitness",self.population[o].fitness)
             fh.FileHandle.fileWriting(self,"files/testingMaze.txt",self.workingMaze) #Getting a test maze
             fh.FileHandle.fileWriting(self,"files/bestSolutionMaze.txt",self.bestSolutionMaze) #Getting the best maze file.txt
             self.workingMaze = self.cleanMaze #Cleaning the maze for the next individual
@@ -201,11 +203,10 @@ class GA:
         print("Final Position: (",self.finalX,' ',self.finalY,')')      
     
     def beginGA(self):
-        print("onga")
         if(self.crossoverMethod == 0):
             self.beginRoulette()
-        #else:
-         #   beginTournament()
+        else:
+            self.beginTournament()
     
     def beginRoulette(self):
         print("on roulette")
@@ -238,6 +239,7 @@ class GA:
 
 
     def beginCrossover(self):
+        #print("On Crossover")
         random.shuffle(self.matingPool)
         for mate in range(int(round(len(self.matingPool)/2))):
             secMateIndex = len(self.matingPool) - mate - 1
@@ -251,13 +253,28 @@ class GA:
 
         #saving the best individual
         self.saveBestIndividual()
-        #For Debug Purpose----------------------------------------------------------
-        for k in range(len(self.population)):
-                print("on ",k,"iteration",self.population[k].genotype)
 
-    #def beginTournament():
+        #flushig the matingPool for the next operations
+        self.matingPool = []
+        #For Debug Purpose----------------------------------------------------------
+        #for k in range(len(self.population)):
+                #print("on ",k,"iteration",self.population[k].genotype)
+
+    def beginTournament(self):
+        #sort the individuals
+        self.population.sort(key=operator.attrgetter('fitness'),reverse = True)
+
+        #choose the best one accordingly to the index on a for loop
+        for _ind in range(self.nIndToCross):
+            self.matingPool.append(_ind)
+
+        #Begin the crossover
+        self.beginCrossover()
+        #Save the est individual again
     def saveBestIndividual(self):
         print("Saving the best individual")
         for indiv in self.population:
             if(indiv.fitness > self.bestIndividual.fitness):
                 self.bestIndividual = indiv
+
+         

@@ -61,7 +61,7 @@ class GA:
 
         #Setting the population with the movements randomly
         #Creating population
-        for k in range(self.numIndividuals):
+        for k in range(self.numIndividuals): 
             #Creating an individual and setting the initial x and y position at the 'S' location
             newIndividual = ind.Individual()
             newIndividual.actualXPos = self.initialX
@@ -109,6 +109,7 @@ class GA:
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == '*'):
                                 self.population[o].fitness -= 1
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'E'):
+                                self.population[o].fitness += 3000
                                 self.population[o].pathFound = 1
                                 self.population[o].path = self.workingMaze
                                 self.workingMaze = self.cleanMaze #Reset the maze
@@ -128,6 +129,7 @@ class GA:
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == '*'):
                                 self.population[o].fitness -= 1
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'E'):
+                                self.population[o].fitness += 3000
                                 self.population[o].pathFound = 1
                                 self.population[o].path = self.workingMaze
                                 self.workingMaze = self.cleanMaze #Reset the maze
@@ -146,6 +148,7 @@ class GA:
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == '*'):
                                 self.population[o].fitness -= 1
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'E'):
+                                self.population[o].fitness += 3000
                                 self.population[o].pathFound = 1
                                 self.population[o].path = self.workingMaze
                                 self.workingMaze = self.cleanMaze #Reset the maze
@@ -165,6 +168,7 @@ class GA:
                                 self.population[o].fitness -= 1
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'E'):
                                 self.population[o].pathFound = 1
+                                self.population[o].fitness += 3000
                                 for a in self.workingMaze:
                                     print(a)
                                 self.population[o].path = self.workingMaze
@@ -239,8 +243,8 @@ class GA:
             counting = 0
         #for aka in self.population:
             #print("Individual Fitness",aka.fitness)
-        print("fitnessSum",fitnessSum)
-        print("Mating pool",self.matingPool)
+        #print("fitnessSum",fitnessSum)
+        #print("Mating pool",self.matingPool)
         self.beginCrossover()
 
     def beginCrossover(self):
@@ -291,7 +295,6 @@ class GA:
                     self.population[m1].genotype[m2] = 'D' #D for down
                 elif(rad == 3):
                     self.population[m1].genotype[m2] = 'L' #L for Left
-
         #Calculating fitness
         self.calculateFitness()
 

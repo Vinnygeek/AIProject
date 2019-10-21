@@ -38,6 +38,7 @@ class GA:
         self.nIndToCross = int(round(self.crossoverIndex*self.numIndividuals/100))
         self.nIndToMutate = int(round(self.mutationIndex*self.numIndividuals/100))
 
+
         #calculating the default size(which is the number of empry spaces of the maze)
         for i in self.workingMaze:
             for j in i:
@@ -60,12 +61,12 @@ class GA:
 
         #Setting the population with the movements randomly
         #Creating population
-        for k in range(self.numIndividuals):
+        for k in range(self.numIndividuals): 
             #Creating an individual and setting the initial x and y position at the 'S' location
             newIndividual = ind.Individual()
             newIndividual.actualXPos = self.initialX
             newIndividual.actualYPos = self.initialY
-            for l in range(10): #self.individualSize
+            for l in range(self.individualSize): #self.individualSize
                 op = self.genRandom(0,3)
                 if(op == 0):
                     newIndividual.genotype.append('U') #U for Up movement
@@ -78,12 +79,21 @@ class GA:
             random.shuffle(newIndividual.genotype)
             self.population.append(newIndividual)
             del newIndividual
-            
+
+        #Calculating the fitness after the random generation
+        self.calculateFitness()
+
+        #Beginning the GA Process on generations and applying mutation
+        for _generation in range(self.numGenerations):
+            print(_generation + 1,"Generation.","Best Fitness so far:",self.bestIndividual.fitness)
+            self.beginGA()
+            self.beginMutation()
         #For debug purpose---------------------------------------------------------------
-        for k in range(len(self.population)):
-            print("on ",k,"iteration",self.population[k].genotype)
+        #for k in range(len(self.population)):
+            #print("on ",k,"iteration",self.population[k].genotype)
 
         #---------------------------------------------------------------------
+    def calculateFitness(self):
         #Calculating the fitness of each individual
         for o in range(len(self.population)):
             for step in self.population[o].genotype:
@@ -99,6 +109,7 @@ class GA:
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == '*'):
                                 self.population[o].fitness -= 1
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'E'):
+                                self.population[o].fitness += 3000
                                 self.population[o].pathFound = 1
                                 self.population[o].path = self.workingMaze
                                 self.workingMaze = self.cleanMaze #Reset the maze
@@ -118,6 +129,7 @@ class GA:
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == '*'):
                                 self.population[o].fitness -= 1
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'E'):
+                                self.population[o].fitness += 3000
                                 self.population[o].pathFound = 1
                                 self.population[o].path = self.workingMaze
                                 self.workingMaze = self.cleanMaze #Reset the maze
@@ -136,6 +148,7 @@ class GA:
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == '*'):
                                 self.population[o].fitness -= 1
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'E'):
+                                self.population[o].fitness += 3000
                                 self.population[o].pathFound = 1
                                 self.population[o].path = self.workingMaze
                                 self.workingMaze = self.cleanMaze #Reset the maze
@@ -155,6 +168,7 @@ class GA:
                                 self.population[o].fitness -= 1
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'E'):
                                 self.population[o].pathFound = 1
+                                self.population[o].fitness += 3000
                                 for a in self.workingMaze:
                                     print(a)
                                 self.population[o].path = self.workingMaze
@@ -171,10 +185,9 @@ class GA:
             fh.FileHandle.fileWriting(self,"files/testingMaze.txt",self.workingMaze) #Getting a test maze
             fh.FileHandle.fileWriting(self,"files/bestSolutionMaze.txt",self.bestSolutionMaze) #Getting the best maze file.txt
             self.workingMaze = self.cleanMaze #Cleaning the maze for the next individual
-            
-        #Saving the best individual from population
+
+        #Saving the best individual of the fitness calculating method
         self.saveBestIndividual()
-        self.beginGA()
 
     def genRandom(self,lLimit,Rlimit):
         value = random.randint(lLimit,Rlimit)
@@ -200,7 +213,8 @@ class GA:
         print("Nº of Gens to mutate: ",self.nGenotypeToMutate)  
         print("Nº Generations set: ",self.numGenerations)
         print("Initial Position: (",self.initialX,' ',self.initialY,')')
-        print("Final Position: (",self.finalX,' ',self.finalY,')')      
+        print("Final Position: (",self.finalX,' ',self.finalY,')')
+        print("Best Individual fitness:",self.bestIndividual.fitness)      
     
     def beginGA(self):
         if(self.crossoverMethod == 0):
@@ -229,14 +243,9 @@ class GA:
             counting = 0
         #for aka in self.population:
             #print("Individual Fitness",aka.fitness)
-        print("fitnessSum",fitnessSum)
-        print("Mating pool",self.matingPool)
+        #print("fitnessSum",fitnessSum)
+        #print("Mating pool",self.matingPool)
         self.beginCrossover()
-        #Saving the best individual from population
-        for indiv in self.population:
-            if (indiv.fitness > self.bestIndividual.fitness):
-                self.bestIndividual = indiv
-
 
     def beginCrossover(self):
         #print("On Crossover")
@@ -251,8 +260,8 @@ class GA:
             self.population[self.matingPool[mate]].genotype = newfirstInd
             self.population[self.matingPool[secMateIndex]].genotype = newSecInd
 
-        #saving the best individual
-        self.saveBestIndividual()
+        #Calculating fitness
+        self.calculateFitness()
 
         #flushig the matingPool for the next operations
         self.matingPool = []
@@ -271,6 +280,24 @@ class GA:
         #Begin the crossover
         self.beginCrossover()
         #Save the est individual again
+
+    def beginMutation(self):
+        #Shuflling the individuals to mutate
+        random.shuffle(self.population)
+        for m1 in range(self.nIndToMutate):
+            for m2 in range(self.nGenotypeToMutate):
+                rad = self.genRandom(0,3)
+                if(rad == 0):
+                    self.population[m1].genotype[m2] = 'U' #U for Up movement
+                elif(rad == 1):
+                    self.population[m1].genotype[m2] = 'R' #R for Right
+                elif(rad == 2):
+                    self.population[m1].genotype[m2] = 'D' #D for down
+                elif(rad == 3):
+                    self.population[m1].genotype[m2] = 'L' #L for Left
+        #Calculating fitness
+        self.calculateFitness()
+
     def saveBestIndividual(self):
         print("Saving the best individual")
         for indiv in self.population:

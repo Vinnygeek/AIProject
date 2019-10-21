@@ -23,7 +23,6 @@ class FileHandle:
         file.close()
 
     def readAndWriteExample(self,labirinth, solvedLabirinth):
-
         #Open a supost to be empty file
         myfile2 = self.readFileWords(labirinth)
 

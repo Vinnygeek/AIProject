@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 import FileHandle as fh
 import random
 import Individual as ind
 import time
 import numpy
 import operator
+
 
 class GA:
     matingPool = [] #will store the index of each individual for mating
@@ -80,8 +82,13 @@ class GA:
             self.population.append(newIndividual)
             del newIndividual
 
-        #Calculating the fitness after the random generation
+        #Calculating initial Fitness
         self.calculateFitness()
+
+        #Saving initial best individual
+        for indiv in self.population:
+            if(indiv.fitness > self.bestIndividual.fitness):
+                self.bestIndividual = indiv
 
         #Beginning the GA Process on generations and applying mutation
         for _generation in range(self.numGenerations):
@@ -186,9 +193,6 @@ class GA:
             fh.FileHandle.fileWriting(self,"files/bestSolutionMaze.txt",self.bestSolutionMaze) #Getting the best maze file.txt
             self.workingMaze = self.cleanMaze #Cleaning the maze for the next individual
 
-        #Saving the best individual of the fitness calculating method
-        self.saveBestIndividual()
-
     def genRandom(self,lLimit,Rlimit):
         value = random.randint(lLimit,Rlimit)
         return value
@@ -263,6 +267,9 @@ class GA:
         #Calculating fitness
         self.calculateFitness()
 
+        #Keeping the best Individual
+        self.saveBestIndividual()
+
         #flushig the matingPool for the next operations
         self.matingPool = []
         #For Debug Purpose----------------------------------------------------------
@@ -298,10 +305,22 @@ class GA:
         #Calculating fitness
         self.calculateFitness()
 
+        #Saving the Best Individual after mutation Process
+        self.saveBestIndividual()
+
     def saveBestIndividual(self):
+        betterIndividualFound = False #This attribute will be true if a better individual is found 
         print("Saving the best individual")
         for indiv in self.population:
             if(indiv.fitness > self.bestIndividual.fitness):
                 self.bestIndividual = indiv
+                betterIndividualFound = True
+        if(betterIndividualFound == False): #none better individual was found on the process
+        #Killing the worse individual accordingly to fitness and adding the best actual individual
+            self.population.sort(key=operator.attrgetter('fitness'),reverse = True)
+            self.population.pop()
+            self.population.append(self.bestIndividual)
+            random.shuffle(self.population)
+
 
          

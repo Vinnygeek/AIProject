@@ -5,6 +5,7 @@ import Individual as ind
 import time
 import numpy
 import operator
+import copy
 
 
 class GA:
@@ -40,7 +41,7 @@ class GA:
         self.numGenerations = numGenerations
         fyfy = fh.FileHandle()
         self.workingMaze = fh.FileHandle.readFileWords(fyfy,self.mazeFile)
-        self.cleanMaze = self.workingMaze
+        self.cleanMaze = copy.deepcopy(self.workingMaze)
         self.bestSolutionMaze = self.cleanMaze
         self.nIndToCross = int(round(self.crossoverIndex*self.numIndividuals/100))
         self.nIndToMutate = int(round(self.mutationIndex*self.numIndividuals/100))
@@ -93,7 +94,7 @@ class GA:
         #Saving initial best individual
         for indiv in self.population:
             if(indiv.fitness > self.bestIndividual.fitness):
-                self.bestIndividual = indiv
+                self.bestIndividual = copy.deepcopy(indiv)
 
         #Showing all genotypes and the best Individual genotype
         for inder in self.population:
@@ -114,6 +115,12 @@ class GA:
     def calculateFitness(self):
         #Calculating the fitness of each individual
         for o in range(len(self.population)):
+            self.population[o].fitness = 0 #Reset previously Fitness set before
+            self.population[o].pathFound = 0
+            self.population[o].actualXPos = self.initialX
+            self.population[o].actualYPos = self.initialY
+            self.workingMaze = copy.deepcopy(self.cleanMaze)
+
             for step in self.population[o].genotype:
                 if(self.population[o].pathFound == 0): #No Path has been found yet
                     if(step == 'U'):
@@ -129,9 +136,9 @@ class GA:
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'E'):
                                 self.population[o].fitness += 3000
                                 self.population[o].pathFound = 1
-                                self.population[o].path = self.workingMaze
-                                self.workingMaze = self.cleanMaze #Reset the maze
-                                self.bestSolutionMaze = self.population[o].path
+                                self.population[o].path = copy.deepcopy(self.workingMaze)
+                                self.workingMaze = copy.deepcopy(self.cleanMaze) #Reset the maze
+                                self.bestSolutionMaze = copy.deepcopy(self.population[o].path)
                                 print("Path Found in U")
                             else:#A wall was hit
                                 self.population[o].fitness -= 2
@@ -149,8 +156,9 @@ class GA:
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'E'):
                                 self.population[o].fitness += 3000
                                 self.population[o].pathFound = 1
-                                self.population[o].path = self.workingMaze
-                                self.workingMaze = self.cleanMaze #Reset the maze
+                                self.population[o].path = copy.deepcopy(self.workingMaze)
+                                self.workingMaze = copy.deepcopy(self.cleanMaze) #Reset the maze
+                                self.bestSolutionMaze = copy.deepcopy(self.population[o].path)
                                 print("Path Found in R")
                             else:#A wall was hit
                                 self.population[o].fitness -= 2
@@ -168,8 +176,9 @@ class GA:
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'E'):
                                 self.population[o].fitness += 3000
                                 self.population[o].pathFound = 1
-                                self.population[o].path = self.workingMaze
-                                self.workingMaze = self.cleanMaze #Reset the maze
+                                self.population[o].path = copy.deepcopy(self.workingMaze)
+                                self.workingMaze = copy.deepcopy(self.cleanMaze) #Reset the maze
+                                self.bestSolutionMaze = copy.deepcopy(self.population[o].path)
                                 print("Path Found in D")
                             else:#A wall was hit
                                 self.population[o].fitness -= 2
@@ -187,20 +196,16 @@ class GA:
                             elif(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == 'E'):
                                 self.population[o].pathFound = 1
                                 self.population[o].fitness += 3000
-                                for a in self.workingMaze:
-                                    print(a)
-                                self.population[o].path = self.workingMaze
-                                self.workingMaze = self.cleanMaze #Reset the maze
+                                self.population[o].path = copy.deecopy(self.workingMaze)
+                                self.workingMaze = copy.deepcopy(self.cleanMaze) #Reset the maze
+                                self.bestSolutionMaze = copy.deepcopy(self.population[o].path)
                                 print("Path Found in L")
                             else:#A wall was hit
                                 self.population[o].fitness -= 2
                                 self.population[o].actualXPos += 1
             for _ind in self.population:
-                if(_ind.fitness == self.bestIndividual.fitness):
-                    print("Best Individual before change, index = ",o,self.bestIndividual.fitness)
                 if(_ind.fitness <= 0):
                     _ind.fitness = 10 #Setting the 10 points fitness to all the negative fitness
-            print("Best Individua after change",self.bestIndividual.fitness)
             #print(o,"Individual Fitness",self.population[o].fitness)
             fyfy2 = fh.FileHandle()
             fh.FileHandle.fileWriting(fyfy2,"files/testingMaze.txt",self.workingMaze) #Getting a test maze
@@ -290,7 +295,7 @@ class GA:
         #For Debug Purpose----------------------------------------------------------
         #for k in range(len(self.population)):
                 #print("on ",k,"iteration",self.population[k].genotype)
-        print("After Crossover best individual fitness is:",self.bestIndividual.fitness)
+
     def beginTournament(self):
         #sort the individuals
         self.population.sort(key=operator.attrgetter('fitness'),reverse = True)
@@ -302,7 +307,7 @@ class GA:
         #Begin the crossover
         self.beginCrossover()
         #Save the est individual again
-        print("After  crossover best individual fitness is:",self.bestIndividual.fitness)
+
     def beginMutation(self):
         #Shuflling the individuals to mutate
         random.shuffle(self.population)
@@ -322,21 +327,27 @@ class GA:
 
         #Saving the Best Individual after mutation Process
         self.saveBestIndividual()
-        print("After Mutation  best individual fitness is:",self.bestIndividual.fitness)
+
     def saveBestIndividual(self):
         betterIndividualFound = False #This attribute will be true if a better individual is found 
         print("Saving the best individual: Actual = ",self.bestIndividual.fitness)
         for indiv in self.population:
             print("On Sabing The best individual Fitness = to ",indiv.fitness)
             if(indiv.fitness > self.bestIndividual.fitness):
-                self.bestIndividual = indiv
+                self.bestIndividual = copy.deepcopy(indiv)
                 betterIndividualFound = True
         if(betterIndividualFound == False): #none better individual was found on the process
         #Killing the worse individual accordingly to fitness and adding the best actual individual
-            self.population.sort(key=operator.attrgetter('fitness'),reverse = True)
-            self.population.pop()
-            self.population.append(self.bestIndividual)
-            random.shuffle(self.population)
+        #Checking if the best individual aren't already on the population
+            itson = False #Means that the actual best individuo isn't on the population
+            for betterin in self.population:
+                if(betterin.fitness == self.bestIndividual.fitness):
+                    itson = True
+            if(itson == False):
+                self.population.sort(key=operator.attrgetter('fitness'),reverse = True)
+                self.population.pop()
+                self.population.append(copy.deepcopy(self.bestIndividual))
+                random.shuffle(self.population)
 
 
          

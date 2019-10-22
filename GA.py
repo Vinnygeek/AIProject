@@ -8,24 +8,28 @@ import operator
 
 
 class GA:
-    matingPool = [] #will store the index of each individual for mating
-    mutationPool = [] #will store the index of each individual for mutation
-    currentGen = 0 #Current Generation of the process
-    individualDefaultSize = 0
-    bestfitness = 0 #The fitness of the best individual
-    cleanMaze = [] #Maze after the GA Process
-    workingMaze = [] #Maze for test the individuals
-    population = [] #Array of individuals
-    bestIndividual = ind.Individual() #Keeps the best individual(Elitism)
-    nIndToCross = 0
-    nIndToMutate = 0
-    initialX = 0 #Initial X position, the beginnig of the path
-    initialY = 0 #Initial y position of the path
-    finalX = 0 #Final x position of the path, its the x goal
-    finalY = 0 #Final y position of the path
-    nGenotypeToMutate = 0
+    #matingPool = [] #will store the index of each individual for mating
+    #mutationPool = [] #will store the index of each individual for mutation
+    #currentGen = 0 #Current Generation of the process
+    #individualDefaultSize = 0
+    #bestfitness = 0 #The fitness of the best individual
+    #cleanMaze = [] #Maze after the GA Process
+    #workingMaze = [] #Maze for test the individuals
+    #population = [] #Array of individuals
+    #bestIndividual = ind.Individual() #Keeps the best individual(Elitism)
+    #nIndToCross = 0
+    #nIndToMutate = 0
+    #initialX = 0 #Initial X position, the beginnig of the path
+    #initialY = 0 #Initial y position of the path
+    #finalX = 0 #Final x position of the path, its the x goal
+    #finalY = 0 #Final y position of the path
+    #nGenotypeToMutate = 0
 
     def __init__(self, mazeFile, numIndividuals,individualSize, crossoverIndex, crossoverMethod, mutationIndex,mutationIndexGenotype, numGenerations):
+        self.matingPool = [] #will store the index of each individual for mating
+        self.bestIndividual = ind.Individual()
+        self.population = []
+        self.individualDefaultSize = 0
         self.mazeFile = mazeFile
         self.numIndividuals = numIndividuals
         self.individualSize = individualSize
@@ -34,7 +38,8 @@ class GA:
         self.mutationIndex = mutationIndex #Percentage of individuals to mutate
         self.mutationIndexGenotype = mutationIndexGenotype #Percentage of genoma to mutate
         self.numGenerations = numGenerations
-        self.workingMaze = fh.FileHandle.readFileWords(self,self.mazeFile)
+        fyfy = fh.FileHandle()
+        self.workingMaze = fh.FileHandle.readFileWords(fyfy,self.mazeFile)
         self.cleanMaze = self.workingMaze
         self.bestSolutionMaze = self.cleanMaze
         self.nIndToCross = int(round(self.crossoverIndex*self.numIndividuals/100))
@@ -89,6 +94,12 @@ class GA:
         for indiv in self.population:
             if(indiv.fitness > self.bestIndividual.fitness):
                 self.bestIndividual = indiv
+
+        #Showing all genotypes and the best Individual genotype
+        for inder in self.population:
+            print("On initial best intividual set: Fitness are",inder.fitness)
+        print("BestGenotypefiness is----------------------------",self.bestIndividual.fitness)
+
 
         #Beginning the GA Process on generations and applying mutation
         for _generation in range(self.numGenerations):
@@ -185,13 +196,16 @@ class GA:
                                 self.population[o].fitness -= 2
                                 self.population[o].actualXPos += 1
             for _ind in self.population:
+                if(_ind.fitness == self.bestIndividual.fitness):
+                    print("Best Individual before change, index = ",o,self.bestIndividual.fitness)
                 if(_ind.fitness <= 0):
                     _ind.fitness = 10 #Setting the 10 points fitness to all the negative fitness
-
+            print("Best Individua after change",self.bestIndividual.fitness)
             #print(o,"Individual Fitness",self.population[o].fitness)
-            fh.FileHandle.fileWriting(self,"files/testingMaze.txt",self.workingMaze) #Getting a test maze
-            fh.FileHandle.fileWriting(self,"files/bestSolutionMaze.txt",self.bestSolutionMaze) #Getting the best maze file.txt
-            self.workingMaze = self.cleanMaze #Cleaning the maze for the next individual
+            fyfy2 = fh.FileHandle()
+            fh.FileHandle.fileWriting(fyfy2,"files/testingMaze.txt",self.workingMaze) #Getting a test maze
+            fh.FileHandle.fileWriting(fyfy2,"files/bestSolutionMaze.txt",self.bestSolutionMaze) #Getting the best maze file.txt
+        self.workingMaze = self.cleanMaze #Cleaning the maze for the next individual
 
     def genRandom(self,lLimit,Rlimit):
         value = random.randint(lLimit,Rlimit)
@@ -206,16 +220,16 @@ class GA:
         else:
             print("Individual size: Unset")
         print("Crossover Index: ",self.crossoverIndex,'%')
-        print("Nº Individuals to crossover:",self.nIndToCross)
+        print("# Individuals to crossover:",self.nIndToCross)
         if(self.crossoverMethod == 0):
             print("Crossover Method: Roulette.")
         else:
             print("Crossover Method: Tournament.")
         print("Mutation Individuals Index: ",self.mutationIndex,'%')
-        print("Nº Individuals to mutate:",self.nIndToMutate)
+        print("# Individuals to mutate:",self.nIndToMutate)
         print("Mutation Genotype Index: ",self.mutationIndexGenotype,'%')
-        print("Nº of Gens to mutate: ",self.nGenotypeToMutate)  
-        print("Nº Generations set: ",self.numGenerations)
+        print("# of Gens to mutate: ",self.nGenotypeToMutate)  
+        print("# Generations set: ",self.numGenerations)
         print("Initial Position: (",self.initialX,' ',self.initialY,')')
         print("Final Position: (",self.finalX,' ',self.finalY,')')
         print("Best Individual fitness:",self.bestIndividual.fitness)      
@@ -250,7 +264,7 @@ class GA:
         #print("fitnessSum",fitnessSum)
         #print("Mating pool",self.matingPool)
         self.beginCrossover()
-
+        print("After Roulette crossover best individual fitness is:",self.bestIndividual.fitness)
     def beginCrossover(self):
         #print("On Crossover")
         random.shuffle(self.matingPool)
@@ -265,8 +279,9 @@ class GA:
             self.population[self.matingPool[secMateIndex]].genotype = newSecInd
 
         #Calculating fitness
+        print("Before calculate Fitness on crossover",self.bestIndividual.fitness)
         self.calculateFitness()
-
+        print("After Calculating Fitness on crossover",self.bestIndividual.fitness)
         #Keeping the best Individual
         self.saveBestIndividual()
 
@@ -275,7 +290,7 @@ class GA:
         #For Debug Purpose----------------------------------------------------------
         #for k in range(len(self.population)):
                 #print("on ",k,"iteration",self.population[k].genotype)
-
+        print("After Crossover best individual fitness is:",self.bestIndividual.fitness)
     def beginTournament(self):
         #sort the individuals
         self.population.sort(key=operator.attrgetter('fitness'),reverse = True)
@@ -287,7 +302,7 @@ class GA:
         #Begin the crossover
         self.beginCrossover()
         #Save the est individual again
-
+        print("After  crossover best individual fitness is:",self.bestIndividual.fitness)
     def beginMutation(self):
         #Shuflling the individuals to mutate
         random.shuffle(self.population)
@@ -307,11 +322,12 @@ class GA:
 
         #Saving the Best Individual after mutation Process
         self.saveBestIndividual()
-
+        print("After Mutation  best individual fitness is:",self.bestIndividual.fitness)
     def saveBestIndividual(self):
         betterIndividualFound = False #This attribute will be true if a better individual is found 
-        print("Saving the best individual")
+        print("Saving the best individual: Actual = ",self.bestIndividual.fitness)
         for indiv in self.population:
+            print("On Sabing The best individual Fitness = to ",indiv.fitness)
             if(indiv.fitness > self.bestIndividual.fitness):
                 self.bestIndividual = indiv
                 betterIndividualFound = True

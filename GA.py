@@ -45,7 +45,7 @@ class GA:
         self.bestSolutionMaze = self.cleanMaze
         self.nIndToCross = int(round(self.crossoverIndex*self.numIndividuals/100))
         self.nIndToMutate = int(round(self.mutationIndex*self.numIndividuals/100))
-
+        self._elitism = []
 
         #calculating the default size(which is the number of empry spaces of the maze)
         for i in self.workingMaze:
@@ -95,18 +95,19 @@ class GA:
         for indiv in self.population:
             if(indiv.fitness > self.bestIndividual.fitness):
                 self.bestIndividual = copy.deepcopy(indiv)
-
+        self._elitism.append([0,self.bestIndividual.fitness])
         #Showing all genotypes and the best Individual genotype
-        for inder in self.population:
-            print("On initial best intividual set: Fitness are",inder.fitness)
-        print("BestGenotypefiness is----------------------------",self.bestIndividual.fitness)
+        #for inder in self.population:
+            #print("On initial best intividual set: Fitness are",inder.fitness)
+        #print("BestGenotypefiness is----------------------------",self.bestIndividual.fitness)
 
 
         #Beginning the GA Process on generations and applying mutation
         for _generation in range(self.numGenerations):
-            print(_generation + 1,"Generation.","Best Fitness so far:",self.bestIndividual.fitness)
+            #print(_generation + 1,"Generation.","Best Fitness so far:",self.bestIndividual.fitness)
             self.beginGA()
             self.beginMutation()
+            self._elitism.append([_generation + 1,copy.deepcopy(self.bestIndividual.fitness)])
         #For debug purpose---------------------------------------------------------------
         #for k in range(len(self.population)):
             #print("on ",k,"iteration",self.population[k].genotype)
@@ -139,12 +140,12 @@ class GA:
                                 self.population[o].path = copy.deepcopy(self.workingMaze)
                                 self.workingMaze = copy.deepcopy(self.cleanMaze) #Reset the maze
                                 self.bestSolutionMaze = copy.deepcopy(self.population[o].path)
-                                print("Path Found in U")
+                                #print("Path Found in U")
                             else:#A wall was hit
                                 self.population[o].fitness -= 2
                                 self.population[o].actualYPos += 1 #Returning to the position before hit.
                     elif(step =='R'):
-                        if(self.population[o].actualXPos < len(self.workingMaze[o]) - 2): #Boundary Condition 
+                        if(self.population[o].actualXPos < len(self.workingMaze[0]) - 2): #Boundary Condition 
                             self.population[o].actualXPos += 1 
                             if(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == ' '):
                                 self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] = '*'
@@ -159,12 +160,12 @@ class GA:
                                 self.population[o].path = copy.deepcopy(self.workingMaze)
                                 self.workingMaze = copy.deepcopy(self.cleanMaze) #Reset the maze
                                 self.bestSolutionMaze = copy.deepcopy(self.population[o].path)
-                                print("Path Found in R")
+                                #print("Path Found in R")
                             else:#A wall was hit
                                 self.population[o].fitness -= 2
                                 self.population[o].actualXPos -= 1
                     elif(step == 'D'):
-                        if(self.population[o].actualYPos < len(self.workingMaze[o]) - 2): #Boundary Condition 
+                        if(self.population[o].actualYPos < len(self.workingMaze[0]) - 2): #Boundary Condition 
                             self.population[o].actualYPos += 1 
                             if(self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] == ' '):
                                 self.workingMaze[self.population[o].actualXPos][self.population[o].actualYPos] = '*'
@@ -179,7 +180,7 @@ class GA:
                                 self.population[o].path = copy.deepcopy(self.workingMaze)
                                 self.workingMaze = copy.deepcopy(self.cleanMaze) #Reset the maze
                                 self.bestSolutionMaze = copy.deepcopy(self.population[o].path)
-                                print("Path Found in D")
+                                #print("Path Found in D")
                             else:#A wall was hit
                                 self.population[o].fitness -= 2
                                 self.population[o].actualYPos -= 1 
@@ -199,7 +200,7 @@ class GA:
                                 self.population[o].path = copy.deecopy(self.workingMaze)
                                 self.workingMaze = copy.deepcopy(self.cleanMaze) #Reset the maze
                                 self.bestSolutionMaze = copy.deepcopy(self.population[o].path)
-                                print("Path Found in L")
+                                #print("Path Found in L")
                             else:#A wall was hit
                                 self.population[o].fitness -= 2
                                 self.population[o].actualXPos += 1
@@ -246,7 +247,7 @@ class GA:
             self.beginTournament()
     
     def beginRoulette(self):
-        print("on roulette")
+        #print("on roulette")
         fitnessSum = 0
         counting = 0
         for tr in self.population:
@@ -269,24 +270,24 @@ class GA:
         #print("fitnessSum",fitnessSum)
         #print("Mating pool",self.matingPool)
         self.beginCrossover()
-        print("After Roulette crossover best individual fitness is:",self.bestIndividual.fitness)
+        #print("After Roulette crossover best individual fitness is:",self.bestIndividual.fitness)
     def beginCrossover(self):
         #print("On Crossover")
         random.shuffle(self.matingPool)
         for mate in range(int(round(len(self.matingPool)/2))):
             secMateIndex = len(self.matingPool) - mate - 1
-            newfirstInd = self.population[self.matingPool[mate]].genotype
-            newSecInd = self.population[self.matingPool[secMateIndex]].genotype
+            newfirstInd = copy.deepcopy(self.population[self.matingPool[mate]].genotype)
+            newSecInd = copy.deepcopy(self.population[self.matingPool[secMateIndex]].genotype)
             for gen in range(int(round(len(newfirstInd)/2))):
-                newfirstInd[gen] = self.population[self.matingPool[secMateIndex]].genotype[len(newfirstInd) - 1 - gen]
-                newSecInd[gen] = self.population[self.matingPool[mate]].genotype[len(newfirstInd) - 1 - gen]
-            self.population[self.matingPool[mate]].genotype = newfirstInd
-            self.population[self.matingPool[secMateIndex]].genotype = newSecInd
+                newfirstInd[gen] = copy.deepcopy(self.population[self.matingPool[secMateIndex]].genotype[len(newfirstInd) - 1 - gen])
+                newSecInd[gen] = copy.deepcopy(self.population[self.matingPool[mate]].genotype[len(newfirstInd) - 1 - gen])
+            self.population[self.matingPool[mate]].genotype = copy.deepcopy(newfirstInd)
+            self.population[self.matingPool[secMateIndex]].genotype = copy.deepcopy(newSecInd)
 
         #Calculating fitness
-        print("Before calculate Fitness on crossover",self.bestIndividual.fitness)
+        #print("Before calculate Fitness on crossover",self.bestIndividual.fitness)
         self.calculateFitness()
-        print("After Calculating Fitness on crossover",self.bestIndividual.fitness)
+        #print("After Calculating Fitness on crossover",self.bestIndividual.fitness)
         #Keeping the best Individual
         self.saveBestIndividual()
 
@@ -302,7 +303,7 @@ class GA:
 
         #choose the best one accordingly to the index on a for loop
         for _ind in range(self.nIndToCross):
-            self.matingPool.append(_ind)
+            self.matingPool.append(copy.deepcopy(_ind))
 
         #Begin the crossover
         self.beginCrossover()
@@ -330,9 +331,9 @@ class GA:
 
     def saveBestIndividual(self):
         betterIndividualFound = False #This attribute will be true if a better individual is found 
-        print("Saving the best individual: Actual = ",self.bestIndividual.fitness)
+        #print("Saving the best individual: Actual = ",self.bestIndividual.fitness)
         for indiv in self.population:
-            print("On Sabing The best individual Fitness = to ",indiv.fitness)
+            #print("On Sabing The best individual Fitness = to ",indiv.fitness)
             if(indiv.fitness > self.bestIndividual.fitness):
                 self.bestIndividual = copy.deepcopy(indiv)
                 betterIndividualFound = True

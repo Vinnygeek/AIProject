@@ -1,5 +1,5 @@
 # AIProject
-A Genetic Algorithm and Ant Colony Optimization for maze path finding. development for the Artifitial Intelligence Class project on 2019
+A Genetic Algorithm for maze path finding. development for the Artifitial Intelligence Class project on 2019's
 2nd Period.
 
 ## Genetic Algorithm:
@@ -47,6 +47,3 @@ The following situations could be used to penalize some individuals' fitness.
 * The individual path contains circles.
 * The individual returns to a previously point, indicating that it took a deadend path somehow.
 * If the individual doesn't hit the objective at all, it will be penalized with the worst fitness value.
-
-## Ant Colony Optmization
-parallel to the GA method prescribed before, the ACO lies on the Evolutionary Algorithm class as well.
